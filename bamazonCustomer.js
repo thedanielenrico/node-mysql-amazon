@@ -34,12 +34,31 @@ connection.query("SELECT * FROM products", function (err, data) {
         }
     ]).then(answers => {
         var chosenItem;
+        var stock_quantity;
+        var purchaseAmount = answers.quantity;
         for (var i = 0; i < data.length; i++) {
             if (data[i].id == answers.purchaseID) {
-                chosenItem = data[i].product_name;
+                chosenItem = data[i];
+                stock_quantity = data[i].stock_quantity;
             }
         }
-        console.log(chosenItem)
+        if (stock_quantity <= 0) {
+            console.log("Insufficient quantity!")
+            connection.end();
+        } else {
+            updateStock(purchaseAmount, stock_quantity, chosenItem);
+        }
     })
-    connection.end();
 })
+
+function updateStock(purchaseAmount, stock_quantity, chosenItem) {
+    var newAmount = Number(stock_quantity) - Number(purchaseAmount);
+    connection.query("UPDATE products SET ? WHERE ?",
+        [{ stock_quantity: newAmount }, { id: chosenItem.id }],
+        function (err) {
+            if (err) throw err;
+            console.log("You just update an item");
+            console.log(stock_quantity)
+        })
+    connection.end();
+}
