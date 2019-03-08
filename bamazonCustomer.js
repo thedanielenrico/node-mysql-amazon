@@ -21,11 +21,19 @@ connection.connect(function (err) {
 
 connection.query("SELECT * FROM products", function (err, data) {
     if (err) throw err;
+    // console.log(data)
     inquirer.prompt([
         {
-            type: "input",
-            message: "What is the ID of the product you would like to purchase?",
-            name: "purchaseID",
+            type: "list",
+            message: "Which product you would like to purchase?",
+            choices: function () {
+                var choicesArray = [];
+                for (var i = 0; i < data.length; i++) {
+                    choicesArray.push(data[i].product_name);
+                }
+                return choicesArray;
+            },
+            name: "selectedItem",
         },
         {
             type: "input",
@@ -37,7 +45,7 @@ connection.query("SELECT * FROM products", function (err, data) {
         var stock_quantity;
         var purchaseAmount = answers.quantity;
         for (var i = 0; i < data.length; i++) {
-            if (data[i].id == answers.purchaseID) {
+            if (data[i].product_name == answers.selectedItem) {
                 chosenItem = data[i];
                 stock_quantity = data[i].stock_quantity;
             }
