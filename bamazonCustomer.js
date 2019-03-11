@@ -65,8 +65,7 @@ function updateStock(purchaseAmount, stock_quantity, chosenItem) {
         [{ stock_quantity: newAmount }, { id: chosenItem.id }],
         function (err) {
             if (err) throw err;
-            console.log("You just update an item");
-            console.log(stock_quantity)
+            console.log("Your order has been placed!");
         })
     connection.end();
 }
