@@ -21,18 +21,18 @@ connection.connect(function (err) {
 
 connection.query("SELECT * FROM products", function (err, data) {
     if (err) throw err;
-    // console.log(data)
+    console.table(data)
     inquirer.prompt([
         {
-            type: "list",
+            type: "input",
             message: "Which product you would like to purchase?",
-            choices: function () {
-                var choicesArray = [];
-                for (var i = 0; i < data.length; i++) {
-                    choicesArray.push(data[i].product_name);
-                }
-                return choicesArray;
-            },
+            // choices: function () {
+            //     var choicesArray = [];
+            //     for (var i = 0; i < data.length; i++) {
+            //         choicesArray.push(data[i].product_name +" $"+ data[i].price +", \n quantity: "+ data[i].stock_quantity);
+            //     }
+            //     return choicesArray;
+            // },
             name: "selectedItem",
         },
         {
@@ -45,12 +45,12 @@ connection.query("SELECT * FROM products", function (err, data) {
         var stock_quantity;
         var purchaseAmount = answers.quantity;
         for (var i = 0; i < data.length; i++) {
-            if (data[i].product_name == answers.selectedItem) {
+            if (data[i].id == answers.selectedItem) {
                 chosenItem = data[i];
                 stock_quantity = data[i].stock_quantity;
             }
         }
-        if (stock_quantity <= 0) {
+        if (purchaseAmount > stock_quantity) {
             console.log("Insufficient quantity!")
             connection.end();
         } else {
@@ -61,11 +61,12 @@ connection.query("SELECT * FROM products", function (err, data) {
 
 function updateStock(purchaseAmount, stock_quantity, chosenItem) {
     var newAmount = Number(stock_quantity) - Number(purchaseAmount);
+    var totalPrice = Number(chosenItem.price) * Number(purchaseAmount);
     connection.query("UPDATE products SET ? WHERE ?",
         [{ stock_quantity: newAmount }, { id: chosenItem.id }],
         function (err) {
             if (err) throw err;
-            console.log("Your order has been placed!");
+            console.log("Your order has been placed at $" +totalPrice+"!");
         })
     connection.end();
 }
